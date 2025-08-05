@@ -13,6 +13,7 @@ esp.ESPSettings = {
     ShowBox = true,
     ShowChams = true,
     MaxDistance = 1000
+    ShowTeam = true
 }
 
 local drawings = {}
@@ -115,6 +116,11 @@ esp.StartESP = function()
 
         for _, player in ipairs(Players:GetPlayers()) do
             if player == LocalPlayer or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+                continue
+            end
+
+            if not esp.ESPSettings.ShowTeam and player.Team == LocalPlayer.Team then
+                removeESP(player)
                 continue
             end
 
