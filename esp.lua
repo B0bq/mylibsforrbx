@@ -12,8 +12,8 @@ esp.ESPSettings = {
     ShowWeapon = true,
     ShowBox = true,
     ShowChams = true,
-    MaxDistance = 1000
-    ShowTeam = true
+    MaxDistance = 1000,
+    ShowTeam = true -- ✅ hide teammates if false
 }
 
 local drawings = {}
@@ -85,7 +85,7 @@ end
 
 local function setupPlayerCleanup(player)
     player.CharacterAdded:Connect(function(char)
-        local humanoid = char:WaitForChild("Humanoid", 1)
+        local humanoid = char:WaitForChild("Humanoid", 5)
         if humanoid then
             humanoid.Died:Connect(function()
                 removeESP(player)
@@ -119,6 +119,7 @@ esp.StartESP = function()
                 continue
             end
 
+            -- ✅ TEAM CHECK
             if not esp.ESPSettings.ShowTeam and player.Team == LocalPlayer.Team then
                 removeESP(player)
                 continue
@@ -138,6 +139,7 @@ esp.StartESP = function()
                 continue
             end
 
+            -- Chams
             if esp.ESPSettings.ShowChams then
                 createCham(player)
             else
@@ -205,7 +207,7 @@ esp.StartESP = function()
                 drawings[player].distance.Visible = false
             end
 
-            -- Weapon (using EquippedTool string)
+            -- Weapon (EquippedTool string)
             if esp.ESPSettings.ShowWeapon then
                 local weaponStr = player.Character:FindFirstChild("EquippedTool")
                 local weaponText = drawings[player].weapon
