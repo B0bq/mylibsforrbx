@@ -69,6 +69,13 @@ end
 
 esp.StartESP = function()
     RunService.RenderStepped:Connect(function()
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer then
+                setupPlayerCleanup(plr)
+            end
+        end
+        Players.PlayerAdded:Connect(setupPlayerCleanup)
+        
         if not esp.ESPSettings.Enabled then
             clearDrawings()
             clearChams()
@@ -164,10 +171,10 @@ esp.StartESP = function()
 
             -- Weapon
             if esp.ESPSettings.ShowWeapon then
-                local tool = player.Character:FindFirstChildOfClass("Tool")
+                local weaponStr = player.Character:FindFirstChildOfClass("EquippedTool")
                 local weaponText = drawings[player].weapon
-                if tool then
-                    weaponText.Text = "[" .. tool.Name .. "]"
+                if weaponStr and weaponStr:IsA("StringValue") and weaponStr.Value ~= "" then
+                    weaponText.Text = "[" .. weaponStr.Value .. "]"
                     weaponText.Position = Vector2.new(pos.X, pos.Y)
                     weaponText.Visible = true
                 else
@@ -176,6 +183,41 @@ esp.StartESP = function()
             else
                 drawings[player].weapon.Visible = false
             end
+        end
+    end)
+end
+
+local function setupPlayerCleanup(player)
+    player.CharacterAdded:Connect(function(char)
+        char:WaitForChild("Humanoid").Died:Connect(function()
+            -- Clean up ESP when they die
+            if drawings[player] then
+                for _, d in pairs(drawings[player]) do
+                    d:Remove()
+                end
+                drawings[player] = nil
+            end
+            if adorns[player] then
+                for _, a in pairs(adorns[player]) do
+                    a:Destroy()
+                end
+                adorns[player] = nil
+            end
+        end)
+    end)
+
+    player.CharacterRemoving:Connect(function()
+        if drawings[player] then
+            for _, d in pairs(drawings[player]) do
+                d:Remove()
+            end
+            drawings[player] = nil
+        end
+        if adorns[player] then
+            for _, a in pairs(adorns[player]) do
+                a:Destroy()
+            end
+            adorns[player] = nil
         end
     end)
 end
