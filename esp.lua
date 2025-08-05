@@ -35,6 +35,15 @@ local function clearDrawings()
     drawings = {}
 end
 
+local function clearChams()
+    for _, v in pairs(adorns) do
+        for _, a in pairs(v) do
+            a:Destroy()
+        end
+    end
+    adorns = {}
+end
+
 local function createCham(player)
     if adorns[player] then return end
     local model = player.Character
@@ -58,24 +67,46 @@ local function createCham(player)
     adorns[player] = parts
 end
 
-local function clearChams()
-    for _, v in pairs(adorns) do
-        for _, a in pairs(v) do
+local function removeESP(player)
+    if drawings[player] then
+        for _, d in pairs(drawings[player]) do
+            d:Remove()
+        end
+        drawings[player] = nil
+    end
+    if adorns[player] then
+        for _, a in pairs(adorns[player]) do
             a:Destroy()
         end
+        adorns[player] = nil
     end
-    adorns = {}
+end
+
+local function setupPlayerCleanup(player)
+    player.CharacterAdded:Connect(function(char)
+        local humanoid = char:WaitForChild("Humanoid", 5)
+        if humanoid then
+            humanoid.Died:Connect(function()
+                removeESP(player)
+            end)
+        end
+    end)
+
+    player.CharacterRemoving:Connect(function()
+        removeESP(player)
+    end)
 end
 
 esp.StartESP = function()
-    RunService.RenderStepped:Connect(function()
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer then
-                setupPlayerCleanup(plr)
-            end
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            setupPlayerCleanup(plr)
         end
-        Players.PlayerAdded:Connect(setupPlayerCleanup)
-        
+    end
+
+    Players.PlayerAdded:Connect(setupPlayerCleanup)
+
+    RunService.RenderStepped:Connect(function()
         if not esp.ESPSettings.Enabled then
             clearDrawings()
             clearChams()
@@ -101,7 +132,6 @@ esp.StartESP = function()
                 continue
             end
 
-            -- Chams
             if esp.ESPSettings.ShowChams then
                 createCham(player)
             else
@@ -169,9 +199,9 @@ esp.StartESP = function()
                 drawings[player].distance.Visible = false
             end
 
-            -- Weapon
+            -- Weapon (using EquippedTool string)
             if esp.ESPSettings.ShowWeapon then
-                local weaponStr = player.Character:FindFirstChildOfClass("EquippedTool")
+                local weaponStr = player.Character:FindFirstChild("EquippedTool")
                 local weaponText = drawings[player].weapon
                 if weaponStr and weaponStr:IsA("StringValue") and weaponStr.Value ~= "" then
                     weaponText.Text = "[" .. weaponStr.Value .. "]"
@@ -183,41 +213,6 @@ esp.StartESP = function()
             else
                 drawings[player].weapon.Visible = false
             end
-        end
-    end)
-end
-
-local function setupPlayerCleanup(player)
-    player.CharacterAdded:Connect(function(char)
-        char:WaitForChild("Humanoid").Died:Connect(function()
-            -- Clean up ESP when they die
-            if drawings[player] then
-                for _, d in pairs(drawings[player]) do
-                    d:Remove()
-                end
-                drawings[player] = nil
-            end
-            if adorns[player] then
-                for _, a in pairs(adorns[player]) do
-                    a:Destroy()
-                end
-                adorns[player] = nil
-            end
-        end)
-    end)
-
-    player.CharacterRemoving:Connect(function()
-        if drawings[player] then
-            for _, d in pairs(drawings[player]) do
-                d:Remove()
-            end
-            drawings[player] = nil
-        end
-        if adorns[player] then
-            for _, a in pairs(adorns[player]) do
-                a:Destroy()
-            end
-            adorns[player] = nil
         end
     end)
 end
