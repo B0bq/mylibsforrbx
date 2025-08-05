@@ -84,7 +84,7 @@ end
 
 local function setupPlayerCleanup(player)
     player.CharacterAdded:Connect(function(char)
-        local humanoid = char:WaitForChild("Humanoid", 5)
+        local humanoid = char:WaitForChild("Humanoid", 1)
         if humanoid then
             humanoid.Died:Connect(function()
                 removeESP(player)
