@@ -2,8 +2,9 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
--- === SETTINGS ===
-local ESPSettings = {
+local esp = {}
+
+esp.ESPSettings = {
     Enabled = true,
     ShowName = true,
     ShowHealth = true,
@@ -14,11 +15,9 @@ local ESPSettings = {
     MaxDistance = 1000
 }
 
--- === INTERNAL ===
 local drawings = {}
 local adorns = {}
 
--- === UTILS ===
 local function createDrawing(class, props)
     local drawing = Drawing.new(class)
     for prop, val in pairs(props) do
@@ -68,115 +67,117 @@ local function clearChams()
     adorns = {}
 end
 
--- === MAIN LOOP ===
-RunService.RenderStepped:Connect(function()
-    if not ESPSettings.Enabled then
-        clearDrawings()
-        clearChams()
-        return
-    end
-
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player == LocalPlayer or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-            continue
+esp.StartESP = function()
+    RunService.RenderStepped:Connect(function()
+        if not esp.ESPSettings.Enabled then
+            clearDrawings()
+            clearChams()
+            return
         end
 
-        local hrp = player.Character.HumanoidRootPart
-        local head = player.Character:FindFirstChild("Head")
-        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-        local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
-
-        if not onScreen or (LocalPlayer:DistanceFromCharacter(hrp.Position) > ESPSettings.MaxDistance) then
-            if drawings[player] then
-                for _, d in pairs(drawings[player]) do
-                    d.Visible = false
-                end
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player == LocalPlayer or not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+                continue
             end
-            continue
-        end
 
-        -- === CHAMS ===
-        if ESPSettings.ShowChams then
-            createCham(player)
-        else
-            if adorns[player] then
-                for _, a in pairs(adorns[player]) do
-                    a:Destroy()
+            local hrp = player.Character.HumanoidRootPart
+            local head = player.Character:FindFirstChild("Head")
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
+
+            if not onScreen or (LocalPlayer:DistanceFromCharacter(hrp.Position) > esp.ESPSettings.MaxDistance) then
+                if drawings[player] then
+                    for _, d in pairs(drawings[player]) do
+                        d.Visible = false
+                    end
                 end
-                adorns[player] = nil
+                continue
             end
-        end
 
-        -- === DRAWINGS ===
-        if not drawings[player] then
-            drawings[player] = {
-                name = createDrawing("Text", {Size = 13, Color = Color3.new(1,1,1), Center = true, Outline = true, Font = 2}),
-                health = createDrawing("Text", {Size = 13, Color = Color3.new(0,1,0), Center = true, Outline = true, Font = 2}),
-                distance = createDrawing("Text", {Size = 13, Color = Color3.new(1,1,0), Center = true, Outline = true, Font = 2}),
-                weapon = createDrawing("Text", {Size = 13, Color = Color3.new(1,1,1), Center = true, Outline = true, Font = 2}),
-                box = createDrawing("Square", {Thickness = 1, Color = player.Team and player.Team.TeamColor.Color or Color3.new(1,1,1)})
-            }
-        end
-
-        local rootPos = workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
-        local headPos = workspace.CurrentCamera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
-        local height = math.abs(headPos.Y - rootPos.Y)
-        local width = height / 2
-
-        -- Box
-        if ESPSettings.ShowBox then
-            local box = drawings[player].box
-            box.Size = Vector2.new(width, height)
-            box.Position = Vector2.new(rootPos.X - width/2, rootPos.Y - height/2)
-            box.Color = player.Team and player.Team.TeamColor.Color or Color3.new(1,1,1)
-            box.Visible = true
-        else
-            drawings[player].box.Visible = false
-        end
-
-        -- Name
-        if ESPSettings.ShowName then
-            local nameText = drawings[player].name
-            nameText.Text = player.Name
-            nameText.Position = Vector2.new(pos.X, pos.Y - 30)
-            nameText.Visible = true
-        else
-            drawings[player].name.Visible = false
-        end
-
-        -- Health
-        if ESPSettings.ShowHealth then
-            local hpText = drawings[player].health
-            hpText.Text = math.floor(humanoid.Health) .. " HP"
-            hpText.Position = Vector2.new(pos.X, pos.Y - 15)
-            hpText.Visible = true
-        else
-            drawings[player].health.Visible = false
-        end
-
-        -- Distance
-        if ESPSettings.ShowDistance then
-            local distText = drawings[player].distance
-            distText.Text = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - hrp.Position).Magnitude) .. "m"
-            distText.Position = Vector2.new(pos.X, pos.Y + 15)
-            distText.Visible = true
-        else
-            drawings[player].distance.Visible = false
-        end
-
-        -- Weapon
-        if ESPSettings.ShowWeapon then
-            local tool = player.Character:FindFirstChildOfClass("Tool")
-            local weaponText = drawings[player].weapon
-            if tool then
-                weaponText.Text = "[" .. tool.Name .. "]"
-                weaponText.Position = Vector2.new(pos.X, pos.Y)
-                weaponText.Visible = true
+            -- Chams
+            if esp.ESPSettings.ShowChams then
+                createCham(player)
             else
-                weaponText.Visible = false
+                if adorns[player] then
+                    for _, a in pairs(adorns[player]) do
+                        a:Destroy()
+                    end
+                    adorns[player] = nil
+                end
             end
-        else
-            drawings[player].weapon.Visible = false
+
+            if not drawings[player] then
+                drawings[player] = {
+                    name = createDrawing("Text", {Size = 13, Color = Color3.new(1,1,1), Center = true, Outline = true, Font = 2}),
+                    health = createDrawing("Text", {Size = 13, Color = Color3.new(0,1,0), Center = true, Outline = true, Font = 2}),
+                    distance = createDrawing("Text", {Size = 13, Color = Color3.new(1,1,0), Center = true, Outline = true, Font = 2}),
+                    weapon = createDrawing("Text", {Size = 13, Color = Color3.new(1,1,1), Center = true, Outline = true, Font = 2}),
+                    box = createDrawing("Square", {Thickness = 1, Color = player.Team and player.Team.TeamColor.Color or Color3.new(1,1,1)})
+                }
+            end
+
+            local rootPos = workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
+            local headPos = workspace.CurrentCamera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
+            local height = math.abs(headPos.Y - rootPos.Y)
+            local width = height / 2
+
+            -- Box
+            if esp.ESPSettings.ShowBox then
+                local box = drawings[player].box
+                box.Size = Vector2.new(width, height)
+                box.Position = Vector2.new(rootPos.X - width/2, rootPos.Y - height/2)
+                box.Color = player.Team and player.Team.TeamColor.Color or Color3.new(1,1,1)
+                box.Visible = true
+            else
+                drawings[player].box.Visible = false
+            end
+
+            -- Name
+            if esp.ESPSettings.ShowName then
+                local nameText = drawings[player].name
+                nameText.Text = player.Name
+                nameText.Position = Vector2.new(pos.X, pos.Y - 30)
+                nameText.Visible = true
+            else
+                drawings[player].name.Visible = false
+            end
+
+            -- Health
+            if esp.ESPSettings.ShowHealth then
+                local hpText = drawings[player].health
+                hpText.Text = math.floor(humanoid.Health) .. " HP"
+                hpText.Position = Vector2.new(pos.X, pos.Y - 15)
+                hpText.Visible = true
+            else
+                drawings[player].health.Visible = false
+            end
+
+            -- Distance
+            if esp.ESPSettings.ShowDistance then
+                local distText = drawings[player].distance
+                distText.Text = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - hrp.Position).Magnitude) .. "m"
+                distText.Position = Vector2.new(pos.X, pos.Y + 15)
+                distText.Visible = true
+            else
+                drawings[player].distance.Visible = false
+            end
+
+            -- Weapon
+            if esp.ESPSettings.ShowWeapon then
+                local tool = player.Character:FindFirstChildOfClass("Tool")
+                local weaponText = drawings[player].weapon
+                if tool then
+                    weaponText.Text = "[" .. tool.Name .. "]"
+                    weaponText.Position = Vector2.new(pos.X, pos.Y)
+                    weaponText.Visible = true
+                else
+                    weaponText.Visible = false
+                end
+            else
+                drawings[player].weapon.Visible = false
+            end
         end
-    end
-end)
+    end)
+end
+
+return esp
