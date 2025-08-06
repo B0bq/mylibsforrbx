@@ -9,7 +9,6 @@ esp.ESPSettings = {
     ShowName = true,
     ShowHealth = true,
     ShowDistance = true,
-    ShowWeapon = true,
     ShowBox = true,
     ShowChams = true,
     MaxDistance = 1000,
@@ -127,7 +126,6 @@ esp.StartESP = function()
             local hrp = player.Character:FindFirstChild("HumanoidRootPart")
             local head = player.Character:FindFirstChild("Head")
             local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            local weaponname = player.Character:FindFirstChildWhichIsA("Tool")
 
             if not humanoid or humanoid.Health <= 0 then
                 removeESP(player)
@@ -191,16 +189,6 @@ esp.StartESP = function()
             name.Text = player.Name
             name.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y - 15)
             name.Visible = esp.ESPSettings.ShowName
-
-            -- Weapon
-            local weapon = drawings[player].weapon
-            if esp.ESPSettings.ShowWeapon and weaponname then
-                weapon.Text = "[" .. weaponname .. "]"
-                weapon.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y + height)
-                weapon.Visible = true
-            else
-                weapon.Visible = false
-            end
 
             -- Distance
             local distance = drawings[player].distance
