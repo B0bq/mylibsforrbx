@@ -162,7 +162,7 @@ esp.StartESP = function()
             end
 
             local rootPos = workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
-            local headPos = workspace.CurrentCamera:WorldToViewportPoint(head.Position + Vector3.new(0, 1, 0))
+            local headPos = workspace.CurrentCamera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
             local height = math.abs(headPos.Y - rootPos.Y)
             local width = height / 2
 
