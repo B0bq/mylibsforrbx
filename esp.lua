@@ -196,12 +196,10 @@ esp.StartESP = function()
             local weapon = drawings[player].weapon
             if esp.ESPSettings.ShowWeapon and weaponname then
                 weapon.Text = "[" .. weaponname .. "]"
-                weapon.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y)
+                weapon.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y + height)
                 weapon.Visible = true
-            elseif esp.ESPSettings.ShowWeapon then
-                weapon.Text = "[" .. "No Weapon" .. "]"
-                weapon.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y)
-                weapon.Visible = true
+            else
+                weapon.Visible = false
             end
 
             -- Distance
