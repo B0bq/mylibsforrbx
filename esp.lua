@@ -127,7 +127,7 @@ esp.StartESP = function()
             local hrp = player.Character:FindFirstChild("HumanoidRootPart")
             local head = player.Character:FindFirstChild("Head")
             local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-            local equippedTool = player.Character:FindFirstChild("EquippedTool")
+            local weaponname = player.Character:FindFirstChildWhichIsA("Tool")
 
             if not humanoid or humanoid.Health <= 0 then
                 removeESP(player)
@@ -194,12 +194,14 @@ esp.StartESP = function()
 
             -- Weapon
             local weapon = drawings[player].weapon
-            if esp.ESPSettings.ShowWeapon and equippedTool and equippedTool:IsA("StringValue") and equippedTool.Value ~= "" then
-                weapon.Text = "[" .. equippedTool.Value .. "]"
+            if esp.ESPSettings.ShowWeapon and  then
+                weapon.Text = "[" .. weaponname .. "]"
                 weapon.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y)
                 weapon.Visible = true
             else
-                weapon.Visible = false
+                weapon.Text = "[" .. "No Weapon" .. "]"
+                weapon.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y)
+                weapon.Visible = true
             end
 
             -- Distance
