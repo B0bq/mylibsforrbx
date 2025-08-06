@@ -194,11 +194,11 @@ esp.StartESP = function()
 
             -- Weapon
             local weapon = drawings[player].weapon
-            if esp.ESPSettings.ShowWeapon and  then
+            if esp.ESPSettings.ShowWeapon and weaponname then
                 weapon.Text = "[" .. weaponname .. "]"
                 weapon.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y)
                 weapon.Visible = true
-            else
+            elseif esp.ESPSettings.ShowWeapon then
                 weapon.Text = "[" .. "No Weapon" .. "]"
                 weapon.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y)
                 weapon.Visible = true
