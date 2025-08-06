@@ -170,7 +170,7 @@ esp.StartESP = function()
             if esp.ESPSettings.ShowBox then
                 local box = drawings[player].box
                 box.Size = Vector2.new(width, height)
-                box.Position = Vector2.new(rootPos.X - width/2, rootPos.Y - height/2)
+                box.Position = Vector2.new(rootPos.X - width/1, rootPos.Y - height/1)
                 box.Color = player.Team and player.Team.TeamColor.Color or Color3.new(1,1,1)
                 box.Visible = true
             else
