@@ -12,11 +12,30 @@ esp.ESPSettings = {
     ShowBox = true,
     ShowChams = true,
     MaxDistance = 1000,
-    ShowTeam = true -- ✅ hide teammates if false
+    ShowTeam = true,
+    TeamColorOverride = false,
+    RainbowMode = false,
+
+    Colors = {
+        Box = Color3.fromRGB(255, 255, 255),
+        Name = Color3.fromRGB(255, 255, 255),
+        Health = Color3.fromRGB(0, 255, 0),
+        Distance = Color3.fromRGB(255, 255, 0),
+        Chams = Color3.fromRGB(255, 255, 255)
+    }
 }
 
 local drawings = {}
 local adorns = {}
+local hue = 0
+
+local function getColor(baseColor)
+    if esp.ESPSettings.RainbowMode then
+        hue = (hue + 0.005) % 1
+        return Color3.fromHSV(hue, 1, 1)
+    end
+    return baseColor
+end
 
 local function createDrawing(class, props)
     local drawing = Drawing.new(class)
@@ -58,7 +77,13 @@ local function createCham(player)
             adorn.ZIndex = 5
             adorn.Size = part.Size
             adorn.Transparency = 0.5
-            adorn.Color3 = player.Team and player.Team.TeamColor.Color or Color3.new(1, 1, 1)
+
+            if esp.ESPSettings.TeamColorOverride then
+                adorn.Color3 = getColor(esp.ESPSettings.Colors.Chams)
+            else
+                adorn.Color3 = player.Team and player.Team.TeamColor.Color or getColor(esp.ESPSettings.Colors.Chams)
+            end
+
             adorn.Parent = game.CoreGui
             table.insert(parts, adorn)
         end
@@ -142,7 +167,6 @@ esp.StartESP = function()
                 continue
             end
 
-            -- Chams
             if esp.ESPSettings.ShowChams then
                 createCham(player)
             else
@@ -160,10 +184,9 @@ esp.StartESP = function()
 
             if not drawings[player] then
                 drawings[player] = {
-                    name = createDrawing("Text", {Size = 13, Color = Color3.new(1,1,1), Center = true, Outline = true, Font = 2}),
+                    name = createDrawing("Text", {Size = 13, Center = true, Outline = true, Font = 2}),
                     healthbar = createDrawing("Square", {Filled = true}),
-                    distance = createDrawing("Text", {Size = 13, Color = Color3.new(1,1,0), Center = true, Outline = true, Font = 2}),
-                    weapon = createDrawing("Text", {Size = 13, Color = Color3.new(1,1,1), Center = true, Outline = true, Font = 2}),
+                    distance = createDrawing("Text", {Size = 13, Center = true, Outline = true, Font = 2}),
                     box = createDrawing("Square", {Thickness = 1})
                 }
             end
@@ -172,7 +195,7 @@ esp.StartESP = function()
             local box = drawings[player].box
             box.Size = Vector2.new(width, height)
             box.Position = boxPos
-            box.Color = player.Team and player.Team.TeamColor.Color or Color3.new(1, 1, 1)
+            box.Color = esp.ESPSettings.TeamColorOverride and getColor(esp.ESPSettings.Colors.Box) or (player.Team and player.Team.TeamColor.Color or getColor(esp.ESPSettings.Colors.Box))
             box.Visible = esp.ESPSettings.ShowBox
 
             -- Health Bar
@@ -181,19 +204,21 @@ esp.StartESP = function()
             local healthbar = drawings[player].healthbar
             healthbar.Size = Vector2.new(2, barHeight)
             healthbar.Position = Vector2.new(boxPos.X - 5, boxPos.Y + (height - barHeight))
-            healthbar.Color = Color3.fromRGB(0, 255, 0)
+            healthbar.Color = getColor(esp.ESPSettings.Colors.Health)
             healthbar.Visible = esp.ESPSettings.ShowHealth
 
             -- Name
             local name = drawings[player].name
             name.Text = player.Name
             name.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y - 15)
+            name.Color = getColor(esp.ESPSettings.Colors.Name)
             name.Visible = esp.ESPSettings.ShowName
 
             -- Distance
             local distance = drawings[player].distance
             distance.Text = math.floor((LocalPlayer.Character.HumanoidRootPart.Position - hrp.Position).Magnitude) .. "m"
             distance.Position = Vector2.new(boxPos.X + width / 2, boxPos.Y + height + 2)
+            distance.Color = getColor(esp.ESPSettings.Colors.Distance)
             distance.Visible = esp.ESPSettings.ShowDistance
         end
     end)
