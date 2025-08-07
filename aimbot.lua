@@ -29,9 +29,9 @@ fovCircle.Filled = false
 
 -- Line to Target
 local targetLine = Drawing.new("Line")
-targetLine.Thickness = 2
+targetLine.Thickness = 1.5
 targetLine.Color = Color3.fromRGB(255, 255, 255)
-targetLine.Transparency = 1
+targetLine.Transparency = 0.8
 
 -- Closest Target Logic
 local function getClosest()
@@ -95,15 +95,13 @@ RunService.RenderStepped:Connect(function()
         local moveVec = (targetVec - mousePos) / math.max(aimbot.Settings.Smoothness, 1)
 
         -- Move cursor
-        if moveVec.Magnitude > 1 then
-            mousemoverel(moveVec.X, moveVec.Y)
-        end
-
-        -- Draw line to target
         if aimbot.Settings.ShowLine then
             targetLine.From = mousePos
             targetLine.To = targetVec
             targetLine.Visible = true
+        end
+        if moveVec.Magnitude > 1 then
+            mousemoverel(moveVec.X, moveVec.Y)
         end
     end
 end)
