@@ -69,7 +69,7 @@ local function getClosest()
     return closest
 end
 
--- Main loop
+-- Main looo
 RunService.RenderStepped:Connect(function()
     local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
     fovCircle.Position = center
