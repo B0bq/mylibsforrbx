@@ -1,9 +1,10 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+
 local Camera = Workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
 
 local aimbot = {}
 
@@ -24,9 +25,9 @@ fovCircle.Radius = aimbot.Settings.FOV
 fovCircle.Transparency = 0.5
 fovCircle.Visible = true
 fovCircle.Filled = false
-fovCircle.Position = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
--- Function to get closest player in FOV
+-- Get Closest Target
 local function getClosest()
     local closest = nil
     local closestDist = math.huge
@@ -52,7 +53,7 @@ local function getClosest()
                 end
             end
 
-            local dist = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
+            local dist = (Vector2.new(screenPos.X, screenPos.Y) - fovCircle.Position).Magnitude
             if dist < closestDist and dist <= aimbot.Settings.FOV then
                 closest = part
                 closestDist = dist
@@ -63,19 +64,25 @@ local function getClosest()
     return closest
 end
 
--- Aimbot loop
+-- Aimbot Logic
 RunService.RenderStepped:Connect(function()
     fovCircle.Radius = aimbot.Settings.FOV
+    fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
     fovCircle.Visible = aimbot.Settings.Enabled
 
     if not aimbot.Settings.Enabled then return end
 
     local targetPart = getClosest()
     if targetPart then
-        local aimPos = Camera:WorldToViewportPoint(targetPart.Position)
-        local mousePos = Vector2.new(Mouse.X, Mouse.Y)
-        local moveVector = (Vector2.new(aimPos.X, aimPos.Y) - mousePos) / (aimbot.Settings.Smoothness > 0 and aimbot.Settings.Smoothness or 1)
-        mousemoverel(moveVector.X, moveVector.Y)
+        local screenPos = Camera:WorldToViewportPoint(targetPart.Position)
+        local mouseLocation = UserInputService:GetMouseLocation()
+        local targetVec = Vector2.new(screenPos.X, screenPos.Y)
+        local moveVec = (targetVec - mouseLocation) / math.max(aimbot.Settings.Smoothness, 1)
+
+        -- Only move if there's actually a change
+        if moveVec.Magnitude > 1 then
+            mousemoverel(moveVec.X, moveVec.Y)
+        end
     end
 end)
 
