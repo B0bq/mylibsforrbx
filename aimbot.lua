@@ -83,7 +83,6 @@ RunService.RenderStepped:Connect(function()
     fovCircle.Visible = aimbot.Settings.Enabled and aimbot.Settings.VisibleFOV
 
     -- Default: hide line
-    targetLine.Visible = false
 
     if not aimbot.Settings.Enabled then return end
     if aimbot.Settings.HoldToAim and not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then return end
@@ -93,7 +92,7 @@ RunService.RenderStepped:Connect(function()
         local screenPos = Camera:WorldToViewportPoint(targetPart.Position)
         local targetVec = Vector2.new(screenPos.X, screenPos.Y)
         local moveVec = (targetVec - mousePos) / math.max(aimbot.Settings.Smoothness, 1)
-
+        targetLine.Visible = false
         -- Move cursor
         if aimbot.Settings.ShowLine then
             targetLine.From = mousePos
