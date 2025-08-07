@@ -75,7 +75,7 @@ RunService.RenderStepped:Connect(function()
     fovCircle.Position = center
     fovCircle.Radius = esp.Settings.FOV
     fovCircle.Visible = esp.Settings.Enabled and esp.Settings.VisibleFOV
-    fovCircle.Color = esp.Settings.Rainbow and getRainbow() or (esp.Settings.UseTeamColor and LocalPlayer.Team.TeamColor.Color or esp.Settings.Colors.FOVColor)
+    fovCircle.Color = esp.Settings.Rainbow and getRainbow() or (esp.Settings.UseTeamColor and LocalPlayer.Team.TeamColor.Color)
 
     targetLine.Visible = false
 
