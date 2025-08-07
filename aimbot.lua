@@ -21,16 +21,6 @@ esp.Settings = {
     UseTeamColor = false,
     Rainbow = false,
     RainbowSpeed = 1,
-    Colors = {
-        BoxColor = Color3.fromRGB(255,255,255),
-        NameColor = Color3.fromRGB(255,255,255),
-        HealthColor = Color3.fromRGB(0,255,0),
-        DistanceColor = Color3.fromRGB(255,255,0),
-        WeaponColor = Color3.fromRGB(255,255,255),
-        ChamsColor = Color3.fromRGB(255,0,0),
-        FOVColor = Color3.fromRGB(255,255,255),
-        TargetLineColor = Color3.fromRGB(255,255,255),
-    }
 }
 
 -- Drawing elements
