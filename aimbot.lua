@@ -12,10 +12,10 @@ aimbot.Settings = {
     Enabled = true,
     Smoothness = 5,
     FOV = 150,
-    TargetPart = "Head", -- "HumanoidRootPart", etc
+    TargetPart = "Head",
     TeamCheck = true,
     VisibleCheck = true,
-    HoldToAim = true, -- right click hold
+    HoldToAim = true,
     VisibleFOV = true,
     ShowLine = true
 }
@@ -30,7 +30,7 @@ fovCircle.Filled = false
 -- Line to Target
 local targetLine = Drawing.new("Line")
 targetLine.Thickness = 1.5
-targetLine.Color = Color3.fromRGB(255, 255, 255)
+targetLine.Color = Color3.new(1, 1, 1)
 targetLine.Transparency = 0.8
 
 -- Closest Target Logic
@@ -77,30 +77,37 @@ RunService.RenderStepped:Connect(function()
     local mousePos = UserInputService:GetMouseLocation()
     local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
-    -- FOV Circle updates
+    -- Update circle
     fovCircle.Position = screenCenter
     fovCircle.Radius = aimbot.Settings.FOV
     fovCircle.Visible = aimbot.Settings.Enabled and aimbot.Settings.VisibleFOV
 
-    -- Default: hide line
+    -- Hide line by default
+    targetLine.Visible = false
 
     if not aimbot.Settings.Enabled then return end
     if aimbot.Settings.HoldToAim and not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then return end
 
     local targetPart = getClosest()
     if targetPart then
-        local screenPos = Camera:WorldToViewportPoint(targetPart.Position)
-        local targetVec = Vector2.new(screenPos.X, screenPos.Y)
-        local moveVec = (targetVec - mousePos) / math.max(aimbot.Settings.Smoothness, 1)
-        targetLine.Visible = false
-        -- Move cursor
+        local target3DPos = targetPart.Position
+        local screenPos = Camera:WorldToViewportPoint(target3DPos)
+        local target2D = Vector2.new(screenPos.X, screenPos.Y)
+
+        -- Draw the line
         if aimbot.Settings.ShowLine then
             targetLine.From = mousePos
-            targetLine.To = targetVec
+            targetLine.To = target2D
             targetLine.Visible = true
         end
-        if moveVec.Magnitude > 1 then
-            mousemoverel(moveVec.X, moveVec.Y)
+
+        -- Move the mouse
+        local smooth = math.clamp(aimbot.Settings.Smoothness, 1, 100)
+        local delta = (target2D - mousePos) / smooth
+
+        -- Fix 1: Only move if distance is bigger than 1 px
+        if delta.Magnitude >= 1 then
+            mousemoverel(delta.X, delta.Y)
         end
     end
 end)
