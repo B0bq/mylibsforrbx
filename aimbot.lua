@@ -10,7 +10,7 @@ local aimbot = {}
 
 aimbot.Settings = {
     Enabled = true,
-    Smoothness = 5,
+    Smoothness = 5, -- Higher = slower turn
     FOV = 150,
     TargetPart = "Head",
     TeamCheck = true,
@@ -20,7 +20,7 @@ aimbot.Settings = {
     ShowLine = true
 }
 
--- FOV Circle
+-- Drawing FOV Circle
 local fovCircle = Drawing.new("Circle")
 fovCircle.Color = Color3.new(1, 1, 1)
 fovCircle.Thickness = 1
@@ -33,7 +33,7 @@ targetLine.Thickness = 1.5
 targetLine.Color = Color3.new(1, 1, 1)
 targetLine.Transparency = 0.8
 
--- Closest Target Logic
+-- Get closest target
 local function getClosest()
     local closest = nil
     local closestDist = math.huge
@@ -62,7 +62,7 @@ local function getClosest()
             end
         end
 
-        local dist = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
+        local dist = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
         if dist < closestDist and dist <= aimbot.Settings.FOV then
             closest = part
             closestDist = dist
@@ -74,15 +74,12 @@ end
 
 -- Main Loop
 RunService.RenderStepped:Connect(function()
-    local mousePos = UserInputService:GetMouseLocation()
     local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
-    -- Update circle
+    -- Update visuals
     fovCircle.Position = screenCenter
     fovCircle.Radius = aimbot.Settings.FOV
     fovCircle.Visible = aimbot.Settings.Enabled and aimbot.Settings.VisibleFOV
-
-    -- Hide line by default
     targetLine.Visible = false
 
     if not aimbot.Settings.Enabled then return end
@@ -90,25 +87,25 @@ RunService.RenderStepped:Connect(function()
 
     local targetPart = getClosest()
     if targetPart then
-        local target3DPos = targetPart.Position
-        local screenPos = Camera:WorldToViewportPoint(target3DPos)
-        local target2D = Vector2.new(screenPos.X, screenPos.Y)
+        local targetPos = targetPart.Position
+        local screenPos = Camera:WorldToViewportPoint(targetPos)
+        local targetScreenPos = Vector2.new(screenPos.X, screenPos.Y)
 
-        -- Draw the line
+        -- Draw line to target
         if aimbot.Settings.ShowLine then
-            targetLine.From = mousePos
-            targetLine.To = target2D
+            targetLine.From = screenCenter
+            targetLine.To = targetScreenPos
             targetLine.Visible = true
         end
 
-        -- Move the mouse
-        local smooth = math.clamp(aimbot.Settings.Smoothness, 1, 100)
-        local delta = (target2D - mousePos) / smooth
+        -- Calculate desired look direction
+        local camPos = Camera.CFrame.Position
+        local direction = (targetPos - camPos).Unit
+        local targetCFrame = CFrame.new(camPos, camPos + direction)
 
-        -- Fix 1: Only move if distance is bigger than 1 px
-        if delta.Magnitude >= 1 then
-            mousemoverel(delta.X, delta.Y)
-        end
+        -- Smooth camera rotation
+        local smooth = math.clamp(aimbot.Settings.Smoothness, 1, 100)
+        Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 1 / smooth)
     end
 end)
 
