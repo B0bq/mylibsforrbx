@@ -29,9 +29,9 @@ fovCircle.Filled = false
 
 -- Line to Target
 local targetLine = Drawing.new("Line")
-targetLine.Thickness = 1.5
+targetLine.Thickness = 2
 targetLine.Color = Color3.fromRGB(255, 255, 255)
-targetLine.Transparency = 0.8
+targetLine.Transparency = 1
 
 -- Closest Target Logic
 local function getClosest()
